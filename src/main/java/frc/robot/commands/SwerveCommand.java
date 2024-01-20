@@ -60,6 +60,7 @@ public class SwerveCommand extends Command {
         double turningSpeedRadiansPerSecond = Rotation2d.fromDegrees(turningSpeed).getRadians();
         Rotation2d currentHeading = Rotation2d.fromDegrees(-swerveSubsystem.getHeading()); //inverted
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, turningSpeedRadiansPerSecond, currentHeading);
+        System.out.println("HI!");
         swerveSubsystem.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds));
         Crashboard.toDashboard("turningSpeedRadiansPerSecond", turningSpeedRadiansPerSecond, "navx");
         Crashboard.toDashboard("currentHeading", currentHeading.getRadians(), "navx");

@@ -8,6 +8,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -19,6 +21,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public final SwerveModule frontRight; 
     public final SwerveModule backLeft;
     public final SwerveModule backRight;
+    public final StructArrayPublisher<SwerveModuleState> publisher;
 
     private final AHRS gyro = new AHRS(SPI.Port.kMXP);
 
@@ -68,7 +71,7 @@ public class SwerveSubsystem extends SubsystemBase {
         odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getRotation2d(), new SwerveModulePosition[] {
             frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()});
 
-        
+        publisher = NetworkTableInstance.getDefault().getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
         
         new Thread(() -> {
             try {
@@ -128,6 +131,8 @@ public class SwerveSubsystem extends SubsystemBase {
         frontRight.setDesiredState(desiredStates[1]);
         backLeft.setDesiredState(desiredStates[2]);
         backRight.setDesiredState(desiredStates[3]);
+        publisher.set(desiredStates);
+        System.out.println(desiredStates);
     }
 
     public SwerveModuleState[] getModuleStates() {

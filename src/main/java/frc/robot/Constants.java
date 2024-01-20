@@ -129,6 +129,18 @@ public final class Constants {
     public static final class OIConstants {
         public static final double kDeadband = 0.05;
     }
+
+    public static final class PIDConstants {
+        public static final double ksVolts = 0.10729;
+        public static final double kvVoltSecondsPerMeter = 0.85456;
+        public static final double kaVoldSecondsSquaredPerMeter = 0.047848;
+
+        public static final double kPDriveVel = 0.111;
+        public static final double kD = 0;
+
+        public static final double kRamseteB = 2;
+        public static final double kRamseteZeta = 0.7;
+    }
 }
 
  /**
