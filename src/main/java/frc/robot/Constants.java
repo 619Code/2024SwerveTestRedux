@@ -97,12 +97,12 @@ public final class Constants {
         //If you want to ignore these then change the limit on the max speeds manually 
         //these seem to be mostly fine but we may need change some things
         // also we need to change the physical dimensions of our base if we are going to use this 
-        public static final double kPhysicalMaxSpeedMetersPerSecond = 5676.0 / 60.0 * ModuleConstants.kDriveEncoderRot2Meter;
+        public static final double kPhysicalMaxSpeedMetersPerSecond = 5676.0 / 60.0 * ModuleConstants.kDriveEncoderRot2Meter; //4.47332629073 m/s
         public static final double kPhysicalMaxAngularSpeedDegreesPerSecond = 360; //2 * Math.PI; //kPhysicalMaxSpeedMetersPerSecond / Math.hypot(DriveConstants.kTrackWidth / 2.0, DriveConstants.kWheelBase / 2.0 * 3);
 
         //These are the variables that determine the max speeds of our swerve drive
-        public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 4;
-        public static final double kTeleDriveMaxAngularSpeedDegreesPerSecond = kPhysicalMaxAngularSpeedDegreesPerSecond / 4;
+        public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond * (0.75); // Divide by 4 for slow testing. 
+        public static final double kTeleDriveMaxAngularSpeedDegreesPerSecond = kPhysicalMaxAngularSpeedDegreesPerSecond * (0.5);
         
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3;

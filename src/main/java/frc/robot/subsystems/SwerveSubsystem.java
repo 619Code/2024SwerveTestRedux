@@ -138,4 +138,9 @@ public class SwerveSubsystem extends SubsystemBase {
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {frontLeft.getState(), frontLeft.getState(), backLeft.getState(), backRight.getState()};
     }
+    public Pose2d getPose2d() {
+        return odometer.getPoseMeters();
+    }
+
+    
 }

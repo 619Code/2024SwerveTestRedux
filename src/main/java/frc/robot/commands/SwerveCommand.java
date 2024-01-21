@@ -5,11 +5,13 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.helpers.Crashboard;
@@ -22,12 +24,19 @@ public class SwerveCommand extends Command {
     private CANcoder FrontLeftCoder;
     private CANSparkMax FrontLeftTurnSpark;
 
+    private SlewRateLimiter driveLimiter, driveLimiterX, driveLimiterY, turnLimiter;
+
     public SwerveCommand(SwerveSubsystem swerveSubsystem, XboxController controller) {
         this.swerveSubsystem = swerveSubsystem;
         this.controller = controller;
         addRequirements(swerveSubsystem);
         this.FrontLeftCoder = swerveSubsystem.frontLeft.getCANcoder();
         this.FrontLeftTurnSpark = swerveSubsystem.frontLeft.turningMotor;
+
+        driveLimiterX = new SlewRateLimiter(2);
+        driveLimiterY = new SlewRateLimiter(2);
+        turnLimiter = new SlewRateLimiter(4);
+        //driveLimiter = new SlewRateLimiter(0.5);
     }
 
     @Override
@@ -45,13 +54,29 @@ public class SwerveCommand extends Command {
         // \:3
         
         double xSpeed = Math.abs(controller.getLeftY()) > OIConstants.kDeadband ? controller.getLeftY() : 0.0;
+
+        xSpeed = driveLimiterX.calculate(xSpeed);
+
         xSpeed = xSpeed * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
-        double ySpeed = Math.abs(controller.getLeftX()) > OIConstants.kDeadband ? controller.getLeftX() : 0.0;        
+        double ySpeed = Math.abs(controller.getLeftX()) > OIConstants.kDeadband ? controller.getLeftX() : 0.0; 
+        
+        ySpeed = driveLimiterY.calculate(ySpeed);
+        
         ySpeed = ySpeed * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;        
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
         double turningSpeed = Math.abs(controller.getRightX()) > OIConstants.kDeadband ? controller.getRightX() : 0.0; 
+
+        turningSpeed = turnLimiter.calculate(turningSpeed);
+
         turningSpeed = turningSpeed * DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond;
+
+
+
         Crashboard.toDashboard("kTeleDriveMaxAngularSpeedDegreesPerSecond", DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond, "navx");
         //turningSpeed = Math.abs(turningSpeed) > OIConstants.kDeadband ? turningSpeed : 0.0;
         //turningSpeed = 0;
@@ -60,7 +85,7 @@ public class SwerveCommand extends Command {
         double turningSpeedRadiansPerSecond = Rotation2d.fromDegrees(turningSpeed).getRadians();
         Rotation2d currentHeading = Rotation2d.fromDegrees(-swerveSubsystem.getHeading()); //inverted
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, turningSpeedRadiansPerSecond, currentHeading);
-        System.out.println("HI!");
+        //System.out.println("HI!");
         swerveSubsystem.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds));
         Crashboard.toDashboard("turningSpeedRadiansPerSecond", turningSpeedRadiansPerSecond, "navx");
         Crashboard.toDashboard("currentHeading", currentHeading.getRadians(), "navx");
@@ -75,18 +100,6 @@ public class SwerveCommand extends Command {
 
     }
 
-    
-    // public void getAngle()
-    // {
-    //     double angle = Math.atan(controller.getRightY()/controller.getRightX());
-    //     if(controller.getRightY() > 0)
-    //     {
-    //         return angle;
-    //     }
-    //     else{
-    //         return angle + 90;
-    //     }
-    // }
 
     @Override
     public void end(boolean interrupted) {
