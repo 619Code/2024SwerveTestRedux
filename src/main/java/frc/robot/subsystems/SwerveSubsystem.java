@@ -84,7 +84,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getRotation2d(), new SwerveModulePosition[] {
             frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()});
-
+//MUST USE A / IN THE NAME OR DIE
         publisher_current = NetworkTableInstance.getDefault()
             .getStructArrayTopic("/MyStatesExpected", SwerveModuleState.struct).publish();
         publisher_desired = NetworkTableInstance.getDefault()
