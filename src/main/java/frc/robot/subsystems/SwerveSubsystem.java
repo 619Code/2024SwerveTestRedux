@@ -4,6 +4,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -22,6 +23,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public final SwerveModule backLeft;
     public final SwerveModule backRight;
     public final StructArrayPublisher<SwerveModuleState> publisher;
+
+    private SwerveDriveKinematics kinematics;
 
     private final AHRS gyro = new AHRS(SPI.Port.kMXP);
 
@@ -67,6 +70,15 @@ public class SwerveSubsystem extends SubsystemBase {
             DriveConstants.kBackRightDriveAbsoluteEncoderPort,
             DriveConstants.kBackRightDriveAbsoluteEncoderOffsetDeg,
             DriveConstants.kBackRightTurningForwardDirection);
+
+        Translation2d frontLeftPos = new Translation2d(0.2667, 0.2667);
+        Translation2d frontRightPos = new Translation2d(0.2667, -0.2667);
+        Translation2d backLeftPos = new Translation2d(-0.2667, 0.2667);
+        Translation2d backRightPos = new Translation2d(-0.2667, -0.2667);
+
+        kinematics = new SwerveDriveKinematics(
+            frontLeftPos, frontRightPos, backLeftPos, backRightPos
+        );
 
         odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getRotation2d(), new SwerveModulePosition[] {
             frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()});
@@ -140,6 +152,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     public Pose2d getPose2d() {
         return odometer.getPoseMeters();
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return kinematics;
     }
 
     
