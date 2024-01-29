@@ -106,11 +106,6 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getRotation2d() {
         return Rotation2d.fromDegrees(getHeading());
     }
-
-    public Pose2d getPose() {
-        return odometer.getPoseMeters();
-    }
-
     @Override
     public void periodic() {
         odometer.update(getRotation2d(), new SwerveModulePosition[] {
@@ -122,7 +117,11 @@ public class SwerveSubsystem extends SubsystemBase {
         frontRight.logIt();
         backLeft.logIt();
         backRight.logIt();
-        Crashboard.toDashboard("gyro angle", gyro.getAngle(), "navx");
+        Crashboard.toDashboard("gyro angle", -gyro.getAngle(), "Odometry");
+        Crashboard.toDashboard("navx odometry pose x", odometer.getPoseMeters().getX(), "Odometry");
+        Crashboard.toDashboard("navx odometry pose y", odometer.getPoseMeters().getY(), "Odometry");
+        
+        
         //SmartDashboard.putNumber("Front Right Wheel Angle", frontRight.getAbsoluteEncoderDeg());
         //SmartDashboard.putNumber("Back Left Wheel Angle", backLeft.getAbsoluteEncoderDeg());
         //SmartDashboard.putNumber("Back Right Wheel Angle", backRight.getAbsoluteEncoderDeg());
@@ -156,6 +155,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public SwerveDriveKinematics getKinematics() {
         return kinematics;
+    }
+    public void resetOdometry() {
+        odometer.resetPosition(gyro.getRotation2d(), new SwerveModulePosition[] {
+            frontLeft.getPosition(),
+            frontRight.getPosition(),
+            backLeft.getPosition(),
+            backRight.getPosition()
+        }, getPose2d());
     }
 
     

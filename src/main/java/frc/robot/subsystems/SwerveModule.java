@@ -81,7 +81,7 @@ public class SwerveModule {
         motor.setSmartCurrentLimit(30);
         motor.burnFlash();
     }
-
+/////Get position from encoders rather than gyro
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(driveEncoder.getPosition(), Rotation2d.fromDegrees(getAbsoluteEncoderDeg()));
     }

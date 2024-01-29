@@ -31,6 +31,9 @@ public final class Constants {
 
     public static final class DriveConstants {
 
+        //Used for uh, idk. 
+        public static final double kNavxUnitsToMetersConversion = 19.4;
+
         // we need to update this // no longer needs to be updated: I measured from center of axle to center of axle
         //thse seem to be based off of the base dimensions
         public static final double kTrackWidth = Units.inchesToMeters(21); 

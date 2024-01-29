@@ -7,6 +7,7 @@ import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -17,11 +18,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.SwerveCommand;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.commands.DriveToPointCommand;
 
 public class RobotContainer {
 
@@ -92,7 +95,14 @@ public class RobotContainer {
         // .andThen(ramseteCommand)
         // .andThen(Commands.runOnce(() -> swerveSubsystem.stopModules()));
 
-        return null;
+        return Commands.runOnce( () -> swerveSubsystem.zeroHeading())
+        .andThen( () -> swerveSubsystem.getKinematics().resetHeadings(new Rotation2d[] {
+            new Rotation2d(0), 
+            new Rotation2d(0),
+            new Rotation2d(0),
+            new Rotation2d(0)}))
+        .andThen( () -> swerveSubsystem.resetOdometry())
+        .andThen(new DriveToPointCommand(swerveSubsystem, new Transform2d(new Translation2d(1 * Constants.DriveConstants.kNavxUnitsToMetersConversion, 0), new Rotation2d(0)), 0.05));
 
         
     }

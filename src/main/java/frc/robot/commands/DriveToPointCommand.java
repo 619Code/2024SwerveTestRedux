@@ -1,26 +1,32 @@
-package frc.robot.commands;
+ package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Joystick.ButtonType;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class DriveToPointCommand extends Command {
 
     private SwerveSubsystem swerve;
-    private Translation2d firstPos, secondPos, ΔPos;
-    private Rotation2d firstRot, secondRot, ΔRot;
+    private Pose2d firstPos, secondPos;
+    private Transform2d dPos;
     private double baseMaxSpeed, rotationMaxSpeed; 
     private double calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed; 
 
-    public DriveToPointCommand(SwerveSubsystem subsystem, Translation2d changeinPosMeters, Rotation2d changeinHeadingRads, double percentageOfMaxSpeed) {
+    public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
 
         swerve = subsystem;
-        ΔPos = changeinPosMeters;
-        ΔRot = changeinHeadingRads;
+        dPos = changeInPose; // for some reason the coordinate systems are messed up. :{
+
+        baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
+        rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed;
 
         addRequirements(subsystem);
 
@@ -28,20 +34,24 @@ public class DriveToPointCommand extends Command {
 
     @Override
     public void initialize() {
-        firstPos = swerve.getPose().getTranslation();
-        firstRot = swerve.getRotation2d();
+        firstPos = swerve.getPose2d();
 
-        secondPos = firstPos.plus(ΔPos);
-        secondRot = firstRot.plus(ΔRot);
+        secondPos = firstPos.transformBy(dPos);
 
-        double dx, dy, dθ;
+        System.out.println("Starting Odometry Position: (X/Y/R), X: " + swerve.getPose2d().getX() + ", Y: " + swerve.getPose2d().getY() + ", R: " + swerve.getPose2d().getRotation().getDegrees());
+
+        double dx, dy, dTheta;
 
 
         // Get the time it would take for each item to reach the destination if it is at the max speed
 
-        dx = secondPos.getX() - firstPos.getX();
-        dy = secondPos.getY() - firstPos.getY();
-        dθ = secondRot.getRadians() - firstRot.getRadians();
+        dx = (secondPos.getX() - firstPos.getX()) * 1;//Constants.ModuleConstants.kDriveEncoderRot2Meter;
+        dy = (secondPos.getY() - firstPos.getY()) * 1;//Constants.ModuleConstants.kDriveEncoderRot2Meter;
+        dTheta = (secondPos.getRotation().getDegrees() - firstPos.getRotation().getDegrees()) * 1;//Constants.ModuleConstants.kDriveEncoderRot2Meter;
+
+        if (Math.abs(dTheta) < 3) { dTheta = 0;}
+        if (Math.abs(dx) < 0.1) { dx = 0;}
+        if (Math.abs(dy) < 0.1) { dy = 0;}
 
         // The times it would take for each item of interest to reach it's destination if it moves at it's max speed
 
@@ -49,37 +59,54 @@ public class DriveToPointCommand extends Command {
 
         xSecMax = dx / baseMaxSpeed;
         ySecMax = dy / baseMaxSpeed;
-        tSecMax = dθ / baseMaxSpeed;
+        tSecMax = dTheta / rotationMaxSpeed;
 
-        //  Get the shortest of these times. In other words, the operation should be performed as fast as the slowest movement can go
+        
+
+        //  Get the longest of these times. In other words, the operation should be performed as fast as the slowest movement can go.
 
         double bottleneckTime = Math.max(Math.max(xSecMax, ySecMax), tSecMax);
-        calculatedXSpeed = dx * bottleneckTime; 
-        calculatedYSpeed = dy * bottleneckTime; 
-        calculatedRotSpeed = dθ * bottleneckTime;
+
+        System.out.println("XSM: " + xSecMax + ", YSM: " + ySecMax + ", TSM: " + tSecMax);
+        System.out.println("BOTTLENECK: " + bottleneckTime);
+
+        calculatedXSpeed = dx / bottleneckTime; // literally meters / seconds
+        calculatedYSpeed = dy / bottleneckTime; 
+        calculatedRotSpeed = dTheta / bottleneckTime;
+
+        // Right now, the calculated X and Y speeds are in meters/second, and not scalar values between 0 and 1.
 
 
-        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, swerve.getRotation2d());
-        swerve.setModuleStates(
-            DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds)
-        );
+        Rotation2d currentHeading = Rotation2d.fromDegrees(-swerve.getHeading()); //inverted
+
+        System.out.println("DX: " + dx + ", DY: " + dy + ", DTHETA: " + dTheta);
+        System.out.println("CXS: " + calculatedXSpeed + ", CYS: " + calculatedYSpeed + ", CRS: " + calculatedRotSpeed);
+
+        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, currentHeading); //from Field
+        swerve.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds));
+        
+        
 
     }
 
     @Override
     public void execute() {
-        System.out.println(":3c");
+        //if (isFinished()) {end(true);}
+        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, Rotation2d.fromDegrees(swerve.getHeading())); //from Field
+        swerve.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds));
     }
 
     @Override
     public boolean isFinished() {
 
-        return (swerve.getPose().getTranslation().getDistance(secondPos) <= 0.1);
+        System.out.println("!!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
+        return (Math.abs(secondPos.getX() - swerve.getPose2d().getX()) <= 0.2);
 
     }
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("Ending Odometry Position: (X/Y/R), X: " + swerve.getPose2d().getX() + ", Y: " + swerve.getPose2d().getY() + ", R: " + swerve.getPose2d().getRotation().getDegrees());
         swerve.stopModules();
     }
 }
