@@ -19,6 +19,7 @@ public class DriveToPointCommand extends Command {
     private Transform2d dPos;
     private double baseMaxSpeed, rotationMaxSpeed; 
     private double calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed; 
+    private double dx, dy, dTheta;
 
     public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
 
@@ -40,8 +41,6 @@ public class DriveToPointCommand extends Command {
 
         System.out.println("Starting Odometry Position: (X/Y/R), X: " + swerve.getPose2d().getX() + ", Y: " + swerve.getPose2d().getY() + ", R: " + swerve.getPose2d().getRotation().getDegrees());
 
-        double dx, dy, dTheta;
-
 
         // Get the time it would take for each item to reach the destination if it is at the max speed
 
@@ -59,13 +58,11 @@ public class DriveToPointCommand extends Command {
 
         xSecMax = dx / baseMaxSpeed;
         ySecMax = dy / baseMaxSpeed;
-        tSecMax = dTheta / rotationMaxSpeed;
-
-        
+        tSecMax = dTheta / rotationMaxSpeed;        
 
         //  Get the longest of these times. In other words, the operation should be performed as fast as the slowest movement can go.
 
-        double bottleneckTime = Math.max(Math.max(xSecMax, ySecMax), tSecMax);
+        double bottleneckTime = Math.max(Math.max(Math.abs(xSecMax), Math.abs(ySecMax)), Math.abs(tSecMax));
 
         System.out.println("XSM: " + xSecMax + ", YSM: " + ySecMax + ", TSM: " + tSecMax);
         System.out.println("BOTTLENECK: " + bottleneckTime);
@@ -76,7 +73,6 @@ public class DriveToPointCommand extends Command {
 
         // Right now, the calculated X and Y speeds are in meters/second, and not scalar values between 0 and 1.
 
-
         Rotation2d currentHeading = Rotation2d.fromDegrees(-swerve.getHeading()); //inverted
 
         System.out.println("DX: " + dx + ", DY: " + dy + ", DTHETA: " + dTheta);
@@ -84,8 +80,6 @@ public class DriveToPointCommand extends Command {
 
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, currentHeading); //from Field
         swerve.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds));
-        
-        
 
     }
 
@@ -99,9 +93,13 @@ public class DriveToPointCommand extends Command {
     @Override
     public boolean isFinished() {
 
-        System.out.println("!!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
-        return (Math.abs(secondPos.getX() - swerve.getPose2d().getX()) <= 0.2);
-
+        System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
+        System.out.println("Y !!" + (swerve.getPose2d().getY() - secondPos.getY()) + "!!");
+        System.out.println("R !!" + (swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) + "!!");
+        boolean xArrived = dx == 0 || Math.abs(swerve.getPose2d().getX() - secondPos.getX()) <= 0.2;
+        boolean yArrived = dy == 0 || Math.abs(swerve.getPose2d().getY() - secondPos.getY()) <= 0.2;
+        boolean tArrived = dTheta == 0 || Math.abs(swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) <= 0.2;
+        return xArrived && yArrived && tArrived;
     }
 
     @Override

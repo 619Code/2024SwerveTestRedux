@@ -102,7 +102,8 @@ public class RobotContainer {
             new Rotation2d(0),
             new Rotation2d(0)}))
         .andThen( () -> swerveSubsystem.resetOdometry())
-        .andThen(new DriveToPointCommand(swerveSubsystem, new Transform2d(new Translation2d(1 * Constants.DriveConstants.kNavxUnitsToMetersConversion, 0), new Rotation2d(0)), 0.05));
+        .andThen(new DriveToPointCommand(swerveSubsystem, new Transform2d(new Translation2d(0 * Constants.DriveConstants.kNavxUnitsToMetersConversion, 1 * Constants.DriveConstants.kNavxUnitsToMetersConversion), new Rotation2d(0)), 0.05));
+        //.andThen(new DriveToPointCommand(swerveSubsystem, new Transform2d(new Translation2d( 1 * Constants.DriveConstants.kNavxUnitsToMetersConversion, 0), new Rotation2d(0)), 0.05));
 
         
     }
