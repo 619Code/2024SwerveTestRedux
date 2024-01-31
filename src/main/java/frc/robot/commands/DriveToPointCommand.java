@@ -96,9 +96,9 @@ public class DriveToPointCommand extends Command {
         System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
         System.out.println("Y !!" + (swerve.getPose2d().getY() - secondPos.getY()) + "!!");
         System.out.println("R !!" + (swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) + "!!");
-        boolean xArrived = dx == 0 || Math.abs(swerve.getPose2d().getX() - secondPos.getX()) <= 0.2;
-        boolean yArrived = dy == 0 || Math.abs(swerve.getPose2d().getY() - secondPos.getY()) <= 0.2;
-        boolean tArrived = dTheta == 0 || Math.abs(swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) <= 0.2;
+        boolean xArrived = Math.abs(secondPos.getX() - swerve.getPose2d().getX()) <= 0.2;
+        boolean yArrived = Math.abs(secondPos.getX() - swerve.getPose2d().getY()) <= 0.2;
+        boolean tArrived = Math.abs(secondPos.getRotation().getDegrees() - swerve.getPose2d().getRotation().getDegrees()) <= 0.2;
         return xArrived && yArrived && tArrived;
     }
 
