@@ -20,8 +20,12 @@ public class DriveToPointCommand extends Command {
     private double baseMaxSpeed, rotationMaxSpeed; 
     private double calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed; 
     private double dx, dy, dTheta;
+    private boolean stickyX, stickyY, stickyR;
 
     public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
+        stickyX = false;
+        stickyY = false;
+        stickyR = false;
 
         swerve = subsystem;
         dPos = changeInPose; // for some reason the coordinate systems are messed up. :{
@@ -35,6 +39,7 @@ public class DriveToPointCommand extends Command {
 
     @Override
     public void initialize() {
+        
         firstPos = swerve.getPose2d();
 
         secondPos = firstPos.transformBy(dPos);
@@ -93,13 +98,31 @@ public class DriveToPointCommand extends Command {
     @Override
     public boolean isFinished() {
 
-        System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
-        System.out.println("Y !!" + (swerve.getPose2d().getY() - secondPos.getY()) + "!!");
-        System.out.println("R !!" + (swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) + "!!");
-        boolean xArrived = Math.abs(secondPos.getX() - swerve.getPose2d().getX()) <= 0.2;
-        boolean yArrived = Math.abs(secondPos.getX() - swerve.getPose2d().getY()) <= 0.2;
-        boolean tArrived = Math.abs(secondPos.getRotation().getDegrees() - swerve.getPose2d().getRotation().getDegrees()) <= 0.2;
-        return xArrived && yArrived && tArrived;
+         System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
+         System.out.println("Y !!" + (swerve.getPose2d().getY() - secondPos.getY()) + "!!");
+         System.out.println("R !!" + (swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) + "!!");
+
+         boolean xArrived = Math.abs(swerve.getPose2d().getX() - secondPos.getX()) <= 0.4;
+         boolean yArrived = Math.abs(swerve.getPose2d().getY() - secondPos.getY()) <= 0.4;
+         boolean tArrived = Math.abs(secondPos.getRotation().getDegrees() - swerve.getPose2d().getRotation().getDegrees()) <= 8;
+
+         if (xArrived) {
+            stickyX = true;
+            calculatedXSpeed = 0;
+         }
+         if (yArrived) {
+            stickyY = true;
+            calculatedYSpeed = 0;
+         }
+         if (tArrived) {
+            stickyR = true;
+            calculatedRotSpeed = 0;
+         }
+
+         return stickyX && stickyY && stickyR;
+
+        // System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
+        // return (Math.abs(secondPos.getX() - swerve.getPose2d().getX()) <= 0.2);
     }
 
     @Override
