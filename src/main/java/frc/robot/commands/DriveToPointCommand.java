@@ -31,7 +31,7 @@ public class DriveToPointCommand extends Command {
         dPos = changeInPose; // for some reason the coordinate systems are messed up. :{
 
         baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
-        rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed;
+        rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed * percentageOfMaxSpeed;
 
         addRequirements(subsystem);
 
@@ -104,7 +104,7 @@ public class DriveToPointCommand extends Command {
 
          boolean xArrived = Math.abs(swerve.getPose2d().getX() - secondPos.getX()) <= 0.4;
          boolean yArrived = Math.abs(swerve.getPose2d().getY() - secondPos.getY()) <= 0.4;
-         boolean tArrived = Math.abs(secondPos.getRotation().getDegrees() - swerve.getPose2d().getRotation().getDegrees()) <= 8;
+         boolean tArrived = Math.abs(swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) <= 4;
 
          if (xArrived) {
             stickyX = true;

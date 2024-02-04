@@ -76,7 +76,7 @@ public class SwerveModule {
 
     private void configureMotor(CANSparkMax motor, Boolean inverted) {
         motor.restoreFactoryDefaults();
-        motor.setIdleMode(IdleMode.kCoast); // change to IdleMode.kBrake when ready.
+        motor.setIdleMode(IdleMode.kBrake); // change to IdleMode.kBrake when ready.
         motor.setInverted(inverted);
         motor.setSmartCurrentLimit(30);
         motor.burnFlash();
@@ -125,13 +125,13 @@ public class SwerveModule {
         
                 
         double turnSpeed = (turningPidController.calculate(getAbsoluteEncoderDeg(), state.angle.getDegrees()));
-        System.out.println("Turn Speed Calculated " + this.ModuleName + ": " + turnSpeed);
+        //System.out.println("Turn Speed Calculated " + this.ModuleName + ": " + turnSpeed);
         if (turnSpeed > 0)
             turnSpeed = Math.min(turnSpeed, .2);
         else
             turnSpeed = Math.max(turnSpeed, -.2);
         
-        System.out.println("Turn Speed Final " + this.ModuleName + ": " + turnSpeed);
+        //System.out.println("Turn Speed Final " + this.ModuleName + ": " + turnSpeed);
         Crashboard.toDashboard(ModuleName + "Turn Speed Final", turnSpeed, "Swerve");
 
         //
