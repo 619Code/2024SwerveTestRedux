@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,6 +30,20 @@ public class SwerveSubsystem extends SubsystemBase {
     private final AHRS gyro = new AHRS(SPI.Port.kMXP);
 
     private final SwerveDriveOdometry odometer;
+
+    private final StructArrayPublisher<SwerveModuleState> publisher_current;
+    private final StructArrayPublisher<SwerveModuleState> publisher_desired;
+
+    SwerveModuleState[] states = new SwerveModuleState[] {
+        new SwerveModuleState(),
+        new SwerveModuleState(),
+        new SwerveModuleState(),
+        new SwerveModuleState()
+    };
+
+    double[] statez = new double[] {
+        30, 12, 30, 12, 30, 12, 30, 12
+    };
 
     public SwerveSubsystem() {
         frontLeft = new SwerveModule(
@@ -82,9 +97,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
         odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getRotation2d(), new SwerveModulePosition[] {
             frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()});
+//MUST USE A / IN THE NAME OR DIE
+        publisher_current = NetworkTableInstance.getDefault()
+            .getStructArrayTopic("/MyStatesExpected", SwerveModuleState.struct).publish();
+        publisher_desired = NetworkTableInstance.getDefault()
+            .getStructArrayTopic("/MyStatesDesired", SwerveModuleState.struct).publish();
 
         publisher = NetworkTableInstance.getDefault().getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
-        
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
@@ -94,7 +113,7 @@ public class SwerveSubsystem extends SubsystemBase {
             }
         }).start();
     }
-
+    
     public void zeroHeading() {
         gyro.reset();
     }
@@ -112,7 +131,6 @@ public class SwerveSubsystem extends SubsystemBase {
             frontLeft.getPosition(), frontRight.getPosition(),
             backLeft.getPosition(), backRight.getPosition()
         });
-
         // Crashboard.toDashboard("Robot Heading", getHeading(), "navx");
         // frontLeft.logIt();
         // frontRight.logIt();
@@ -121,8 +139,16 @@ public class SwerveSubsystem extends SubsystemBase {
         // Crashboard.toDashboard("gyro angle", -gyro.getAngle(), "Odometry");
         // Crashboard.toDashboard("navx odometry pose x", odometer.getPoseMeters().getX(), "Odometry");
         // Crashboard.toDashboard("navx odometry pose y", odometer.getPoseMeters().getY(), "Odometry");
-        
-        
+
+        Crashboard.toDashboard("Robot Heading", getHeading(), "navx");
+        frontLeft.logIt();
+        frontRight.logIt();
+        backLeft.logIt();
+        backRight.logIt();
+        Crashboard.toDashboard("gyro angle", gyro.getAngle(), "navx");
+        publisher_current.set(getModuleStates(), 0);
+        //System.out.println(getModuleStates()[1].speedMetersPerSecond);
+        //System.out.println(getModuleStates()[1].angle);
         //SmartDashboard.putNumber("Front Right Wheel Angle", frontRight.getAbsoluteEncoderDeg());
         //SmartDashboard.putNumber("Back Left Wheel Angle", backLeft.getAbsoluteEncoderDeg());
         //SmartDashboard.putNumber("Back Right Wheel Angle", backRight.getAbsoluteEncoderDeg());
@@ -145,10 +171,12 @@ public class SwerveSubsystem extends SubsystemBase {
         backRight.setDesiredState(desiredStates[3]);
         publisher.set(desiredStates);
         //System.out.println(desiredStates);
+        publisher_desired.set(desiredStates, 0);
+        System.out.println(desiredStates);
     }
 
     public SwerveModuleState[] getModuleStates() {
-        return new SwerveModuleState[] {frontLeft.getState(), frontLeft.getState(), backLeft.getState(), backRight.getState()};
+        return new SwerveModuleState[] {frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState()};
     }
     public Pose2d getPose2d() {
         return odometer.getPoseMeters();
