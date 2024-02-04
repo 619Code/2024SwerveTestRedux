@@ -120,8 +120,8 @@ public class SwerveModule {
         double driveSpeed = MathUtil.clamp(state.speedMetersPerSecond  / Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond/* / 360*/, -.75 ,.75);
   
         driveMotor.set(driveSpeed);
-        Crashboard.toDashboard("driveSpeed", driveSpeed, "Swerve");
-        Crashboard.toDashboard("speed in m/s", state.speedMetersPerSecond, "Swerve");
+        // Crashboard.toDashboard("driveSpeed", driveSpeed, "Swerve");
+        // Crashboard.toDashboard("speed in m/s", state.speedMetersPerSecond, "Swerve");
         
                 
         double turnSpeed = (turningPidController.calculate(getAbsoluteEncoderDeg(), state.angle.getDegrees()));
@@ -132,7 +132,7 @@ public class SwerveModule {
             turnSpeed = Math.max(turnSpeed, -.2);
         
         //System.out.println("Turn Speed Final " + this.ModuleName + ": " + turnSpeed);
-        Crashboard.toDashboard(ModuleName + "Turn Speed Final", turnSpeed, "Swerve");
+        // Crashboard.toDashboard(ModuleName + "Turn Speed Final", turnSpeed, "Swerve");
 
         //
 

@@ -112,14 +112,15 @@ public class SwerveSubsystem extends SubsystemBase {
             frontLeft.getPosition(), frontRight.getPosition(),
             backLeft.getPosition(), backRight.getPosition()
         });
-        Crashboard.toDashboard("Robot Heading", getHeading(), "navx");
-        frontLeft.logIt();
-        frontRight.logIt();
-        backLeft.logIt();
-        backRight.logIt();
-        Crashboard.toDashboard("gyro angle", -gyro.getAngle(), "Odometry");
-        Crashboard.toDashboard("navx odometry pose x", odometer.getPoseMeters().getX(), "Odometry");
-        Crashboard.toDashboard("navx odometry pose y", odometer.getPoseMeters().getY(), "Odometry");
+
+        // Crashboard.toDashboard("Robot Heading", getHeading(), "navx");
+        // frontLeft.logIt();
+        // frontRight.logIt();
+        // backLeft.logIt();
+        // backRight.logIt();
+        // Crashboard.toDashboard("gyro angle", -gyro.getAngle(), "Odometry");
+        // Crashboard.toDashboard("navx odometry pose x", odometer.getPoseMeters().getX(), "Odometry");
+        // Crashboard.toDashboard("navx odometry pose y", odometer.getPoseMeters().getY(), "Odometry");
         
         
         //SmartDashboard.putNumber("Front Right Wheel Angle", frontRight.getAbsoluteEncoderDeg());
