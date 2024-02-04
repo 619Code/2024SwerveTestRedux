@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -75,12 +76,12 @@ public class SwerveModule {
 
     private void configureMotor(CANSparkMax motor, Boolean inverted) {
         motor.restoreFactoryDefaults();
-        motor.setIdleMode(IdleMode.kCoast);
+        motor.setIdleMode(IdleMode.kBrake); // change to IdleMode.kBrake when ready.
         motor.setInverted(inverted);
         motor.setSmartCurrentLimit(30);
         motor.burnFlash();
     }
-
+/////Get position from encoders rather than gyro
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(driveEncoder.getPosition(), Rotation2d.fromDegrees(getAbsoluteEncoderDeg()));
     }
@@ -116,22 +117,24 @@ public class SwerveModule {
         state.speedMetersPerSecond *= state.angle.minus(Rotation2d.fromDegrees(getAbsoluteEncoderDeg())).getCos();
         
         // Calculate the drive output from the drive PID controller. ;}
-        double driveSpeed = MathUtil.clamp(state.speedMetersPerSecond  / Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond/* / 360*/, -.5 ,.5);
+        double driveSpeed = MathUtil.clamp(state.speedMetersPerSecond  / Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond/* / 360*/, -.75 ,.75);
   
         driveMotor.set(driveSpeed);
-        Crashboard.toDashboard("driveSpeed", driveSpeed, "Swerve");
-        Crashboard.toDashboard("speed in m/s", state.speedMetersPerSecond, "Swerve");
+        // Crashboard.toDashboard("driveSpeed", driveSpeed, "Swerve");
+        // Crashboard.toDashboard("speed in m/s", state.speedMetersPerSecond, "Swerve");
         
                 
         double turnSpeed = (turningPidController.calculate(getAbsoluteEncoderDeg(), state.angle.getDegrees()));
-        System.out.println("Turn Speed Calculated " + this.ModuleName + ": " + turnSpeed);
+        //System.out.println("Turn Speed Calculated " + this.ModuleName + ": " + turnSpeed);
         if (turnSpeed > 0)
             turnSpeed = Math.min(turnSpeed, .2);
         else
             turnSpeed = Math.max(turnSpeed, -.2);
         
-        System.out.println("Turn Speed Final " + this.ModuleName + ": " + turnSpeed);
-        Crashboard.toDashboard(ModuleName + "Turn Speed Final", turnSpeed, "Swerve");
+        //System.out.println("Turn Speed Final " + this.ModuleName + ": " + turnSpeed);
+        // Crashboard.toDashboard(ModuleName + "Turn Speed Final", turnSpeed, "Swerve");
+
+        //
 
         turningMotor.set(turnSpeed);
         //System.out.println(ModuleName + "- DriveMotorCommand: " + driveSpeed + " - True Angle: " + getAbsoluteEncoderRad() + " AngleSetPoint: " + state.angle.getDegrees() + " AngleMotorCommand: " + turnSpeed);

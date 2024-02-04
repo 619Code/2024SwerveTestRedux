@@ -31,6 +31,9 @@ public final class Constants {
 
     public static final class DriveConstants {
 
+        //Used for uh, idk. 
+        public static final double kNavxUnitsToMetersConversion = 19.4;
+
         // we need to update this // no longer needs to be updated: I measured from center of axle to center of axle
         //thse seem to be based off of the base dimensions
         public static final double kTrackWidth = Units.inchesToMeters(21); 
@@ -97,12 +100,12 @@ public final class Constants {
         //If you want to ignore these then change the limit on the max speeds manually 
         //these seem to be mostly fine but we may need change some things
         // also we need to change the physical dimensions of our base if we are going to use this 
-        public static final double kPhysicalMaxSpeedMetersPerSecond = 5676.0 / 60.0 * ModuleConstants.kDriveEncoderRot2Meter;
+        public static final double kPhysicalMaxSpeedMetersPerSecond = 5676.0 / 60.0 * ModuleConstants.kDriveEncoderRot2Meter; //4.47332629073 m/s
         public static final double kPhysicalMaxAngularSpeedDegreesPerSecond = 360; //2 * Math.PI; //kPhysicalMaxSpeedMetersPerSecond / Math.hypot(DriveConstants.kTrackWidth / 2.0, DriveConstants.kWheelBase / 2.0 * 3);
 
         //These are the variables that determine the max speeds of our swerve drive
-        public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 4;
-        public static final double kTeleDriveMaxAngularSpeedDegreesPerSecond = kPhysicalMaxAngularSpeedDegreesPerSecond / 4;
+        public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond * (0.75); // Divide by 4 for slow testing. 
+        public static final double kTeleDriveMaxAngularSpeedDegreesPerSecond = kPhysicalMaxAngularSpeedDegreesPerSecond * (0.5);
         
         public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 3;
         public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3;
@@ -129,54 +132,16 @@ public final class Constants {
     public static final class OIConstants {
         public static final double kDeadband = 0.05;
     }
-}
 
- /**
-public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+    public static final class PIDConstants {
+        public static final double ksVolts = 0.10729;
+        public static final double kvVoltSecondsPerMeter = 0.85456;
+        public static final double kaVoldSecondsSquaredPerMeter = 0.047848;
 
-    //these numbers may be incorrect 
-  }
+        public static final double kPDriveVel = 0.111;
+        public static final double kD = 0;
 
-    public static final int kDriverControllerPort = 1;
-
-    public static final double kTrackWidth = Units.inchesToMeters(21);
-        // Distance between right and left wheels
-    public static final double kWheelBase = Units.inchesToMeters(25.5);
-        // Distance between front and back wheels
-
-    
-    //please update these with the accurate dimensions for robot
-    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
-    new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-    new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-    new Translation2d(-kWheelBase / 2, -kTrackWidth / 2),
-    new Translation2d(-kWheelBase / 2, kTrackWidth / 2));
-    
-
-
-    public static final double kDriveEncoderRot2Meter = kDriveMotorGearRatio * Math.PI * kWheelDiameterMeters;
-    public static final double kTurningEncoderRot2Rad = kTurningMotorGearRatio * 2 * Math.PI;
-    public static final double kDriveEncoderRPM2MeterPerSec = kDriveEncoderRot2Meter / 60;
-    public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
-    public static final double kPturning = 0.5;
-    public static final double kMaxSpeed = 5;
-    public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 5;
-    public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 5;
-
-    public static final double kPhysicalMaxSpeedMetersPerSecond = 5;
-    public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
-
-    public static final int kDriverYAxis = 1;
-    public static final int kDriverXAxis = 0;
-    public static final int kDriverRotAxis = 4;
-    public static final int kDriverFieldOrientedButtonIdx = 1;
-    public static final double kDeadband = 0.05;
-    public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 4;
-    public static final double kMaxAngularAccelerationRadiansPerSecondSquared = Math.PI / 4;
-    public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = //
-                kPhysicalMaxAngularSpeedRadiansPerSecond / 4;
-}
-*/
- 
+        public static final double kRamseteB = 2;
+        public static final double kRamseteZeta = 0.7;
+    }
+} 
