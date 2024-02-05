@@ -22,20 +22,56 @@ public class DriveToPointCommand extends Command {
     private double dx, dy, dTheta;
     private boolean stickyX, stickyY, stickyR;
 
-    public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
+    // public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
+    //     stickyX = false;
+    //     stickyY = false;
+    //     stickyR = false;
+
+    //     swerve = subsystem;
+    //     dPos = changeInPose; // for some reason the coordinate systems are messed up. :{
+
+    //     baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
+    //     rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed * percentageOfMaxSpeed;
+
+    //     addRequirements(subsystem);
+
+    // }
+
+    public DriveToPointCommand(SwerveSubsystem subsystem, double changeinXMeters, double changeinYMeters, double percentageOfMaxSpeed) {
         stickyX = false;
         stickyY = false;
         stickyR = false;
 
         swerve = subsystem;
-        dPos = changeInPose; // for some reason the coordinate systems are messed up. :{
+        dPos = new Transform2d(
+            new Translation2d(
+                changeinXMeters * Constants.DriveConstants.kNavxUnitsToMetersConversion, changeinYMeters * Constants.DriveConstants.kNavxUnitsToMetersConversion
+            ),
+            Rotation2d.fromDegrees(0)
+        );
 
         baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
         rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed * percentageOfMaxSpeed;
 
         addRequirements(subsystem);
-
     }
+
+    public DriveToPointCommand(SwerveSubsystem subsystem, double changeInHeadingDegrees, double percentageOfMaxSpeed) {
+        stickyX = false;
+        stickyY = false;
+        stickyR = false;
+
+        swerve = subsystem;
+        dPos = new Transform2d(
+            new Translation2d(0, 0), 
+            Rotation2d.fromDegrees(changeInHeadingDegrees)
+        );
+        
+        baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
+        rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed * percentageOfMaxSpeed;
+
+        addRequirements(subsystem);
+    } 
 
     @Override
     public void initialize() {
@@ -83,7 +119,7 @@ public class DriveToPointCommand extends Command {
         System.out.println("DX: " + dx + ", DY: " + dy + ", DTHETA: " + dTheta);
         System.out.println("CXS: " + calculatedXSpeed + ", CYS: " + calculatedYSpeed + ", CRS: " + calculatedRotSpeed);
 
-        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, currentHeading); //from Field
+        ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, currentHeading); //from Field
         swerve.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds));
 
     }
@@ -91,7 +127,7 @@ public class DriveToPointCommand extends Command {
     @Override
     public void execute() {
         //if (isFinished()) {end(true);}
-        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, Rotation2d.fromDegrees(swerve.getHeading())); //from Field
+        ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, Rotation2d.fromDegrees(-swerve.getHeading())); //from Field
         swerve.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds));
     }
 
