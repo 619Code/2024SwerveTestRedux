@@ -8,8 +8,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Joystick.ButtonType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.helpers.LimelightHelpers;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class DriveToPointCommand extends Command {
@@ -21,6 +23,7 @@ public class DriveToPointCommand extends Command {
     private double calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed; 
     private double dx, dy, dTheta;
     private boolean stickyX, stickyY, stickyR;
+    private Trigger stop;
 
     // public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
     //     stickyX = false;
@@ -41,6 +44,30 @@ public class DriveToPointCommand extends Command {
         stickyX = false;
         stickyY = false;
         stickyR = false;
+
+        swerve = subsystem;
+        dPos = new Transform2d(
+            new Translation2d(
+                changeinXMeters * Constants.DriveConstants.kNavxUnitsToMetersConversion, changeinYMeters * Constants.DriveConstants.kNavxUnitsToMetersConversion
+            ),
+            Rotation2d.fromDegrees(0)
+        );
+
+        baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
+        rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed * percentageOfMaxSpeed;
+
+        addRequirements(subsystem);
+    }
+
+    public DriveToPointCommand(SwerveSubsystem subsystem, double percentageOfMaxSpeed, Trigger stopTrigger) {
+        stickyX = false;
+        stickyY = false;
+        stickyR = false;
+        stop = stopTrigger;
+
+        double changeinYMeters = LimelightHelpers.getBotPose_TargetSpace("")[3];
+        double changeinXMeters = -LimelightHelpers.getBotPose_TargetSpace("")[4];
+        System.out.println(dx + " // " + dy);
 
         swerve = subsystem;
         dPos = new Transform2d(
@@ -126,6 +153,9 @@ public class DriveToPointCommand extends Command {
 
     @Override
     public void execute() {
+        if (stop != null && stop.getAsBoolean()) {
+            end(true);
+        }
         //if (isFinished()) {end(true);}
         ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(calculatedXSpeed, calculatedYSpeed, calculatedRotSpeed, Rotation2d.fromDegrees(-swerve.getHeading())); //from Field
         swerve.setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds));
@@ -155,7 +185,7 @@ public class DriveToPointCommand extends Command {
             calculatedRotSpeed = 0;
          }
 
-         return stickyX && stickyY && stickyR;
+         return (stickyX && stickyY && stickyR) || stop.getAsBoolean();
 
         // System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
         // return (Math.abs(secondPos.getX() - swerve.getPose2d().getX()) <= 0.2);

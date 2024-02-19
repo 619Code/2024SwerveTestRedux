@@ -2,24 +2,22 @@ package frc.robot;
 
 import java.util.List;
 
+import org.xml.sax.ext.LexicalHandler;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
-import edu.wpi.first.math.trajectory.constraint.SwerveDriveKinematicsConstraint;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveCommand;
+import frc.robot.helpers.LimelightHelpers;
+import frc.robot.subsystems.LimelightSub;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.AutoConstants;
@@ -29,7 +27,11 @@ import frc.robot.commands.DriveToPointCommand;
 public class RobotContainer {
 
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();;
-    private final XboxController driverOne = new XboxController(0);
+    private final CommandXboxController driverOne = new CommandXboxController(0);
+    private Trigger abortDrive = driverOne.a();
+    private LimelightSub ll = new LimelightSub();
+
+    private static double dx = 0, dy = 0;
 
     public RobotContainer() {
         swerveSubsystem.setDefaultCommand(new SwerveCommand(swerveSubsystem, driverOne));
@@ -39,7 +41,15 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
 
-        
+        Trigger drive = driverOne.y();
+        drive.onTrue(Commands.runOnce( () -> swerveSubsystem.zeroHeading())                         //WE HAVE YOU SURROUNDED! COME WRITE ANONYMOUS FUNCTIONS!
+        .andThen( () -> swerveSubsystem.getKinematics().resetHeadings(new Rotation2d[] {            //I HATE LAMBDAS! I HATE LAMBDAS!
+            new Rotation2d(0), 
+            new Rotation2d(0),
+            new Rotation2d(0),
+            new Rotation2d(0)}))
+        .andThen(new DriveToPointCommand(swerveSubsystem, 0.05, abortDrive)) 
+        );
         
     }
 
@@ -102,7 +112,7 @@ public class RobotContainer {
             new Rotation2d(0),
             new Rotation2d(0)}))
         .andThen( () -> swerveSubsystem.resetOdometry())
-        .andThen(new DriveToPointCommand(swerveSubsystem, -1, 2, 0.05))
+        .andThen(new DriveToPointCommand(swerveSubsystem, -1, 2, 0.05 ))//, abortDrive))
         ;
         
     }
