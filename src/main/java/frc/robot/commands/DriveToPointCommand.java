@@ -5,8 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Joystick.ButtonType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
@@ -24,21 +22,6 @@ public class DriveToPointCommand extends Command {
     private double dx, dy, dTheta;
     private boolean stickyX, stickyY, stickyR;
     private Trigger stop;
-
-    // public DriveToPointCommand(SwerveSubsystem subsystem, Transform2d changeInPose, double percentageOfMaxSpeed) {
-    //     stickyX = false;
-    //     stickyY = false;
-    //     stickyR = false;
-
-    //     swerve = subsystem;
-    //     dPos = changeInPose; // for some reason the coordinate systems are messed up. :{
-
-    //     baseMaxSpeed = Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond * percentageOfMaxSpeed;
-    //     rotationMaxSpeed = Constants.DriveConstants.kTeleDriveMaxAngularSpeedDegreesPerSecond * percentageOfMaxSpeed * percentageOfMaxSpeed;
-
-    //     addRequirements(subsystem);
-
-    // }
 
     public DriveToPointCommand(SwerveSubsystem subsystem, double changeinXMeters, double changeinYMeters, double percentageOfMaxSpeed) {
         stickyX = false;
@@ -65,8 +48,8 @@ public class DriveToPointCommand extends Command {
         stickyR = false;
         stop = stopTrigger;
 
-        double changeinYMeters = LimelightHelpers.getBotPose_TargetSpace("")[3];
-        double changeinXMeters = -LimelightHelpers.getBotPose_TargetSpace("")[4];
+        double changeinYMeters = -LimelightHelpers.getTX("");
+        double changeinXMeters = -LimelightHelpers.getTY("");
         System.out.println(dx + " // " + dy);
 
         swerve = subsystem;
@@ -120,7 +103,7 @@ public class DriveToPointCommand extends Command {
         if (Math.abs(dx) < 0.1) { dx = 0;}
         if (Math.abs(dy) < 0.1) { dy = 0;}
 
-        // The times it would take for each item of interest to reach it's destination if it moves at it's max speed
+        // The times it would take for each item of interest to reach it's destination if it moves at its max speed
 
         double xSecMax, ySecMax, tSecMax;
 
@@ -164,9 +147,9 @@ public class DriveToPointCommand extends Command {
     @Override
     public boolean isFinished() {
 
-         System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
-         System.out.println("Y !!" + (swerve.getPose2d().getY() - secondPos.getY()) + "!!");
-         System.out.println("R !!" + (swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) + "!!");
+        //  System.out.println("X !!" + (swerve.getPose2d().getX() - secondPos.getX()) + "!!");
+        //  System.out.println("Y !!" + (swerve.getPose2d().getY() - secondPos.getY()) + "!!");
+        //  System.out.println("R !!" + (swerve.getPose2d().getRotation().getDegrees() - secondPos.getRotation().getDegrees()) + "!!");
 
          boolean xArrived = Math.abs(swerve.getPose2d().getX() - secondPos.getX()) <= 0.4;
          boolean yArrived = Math.abs(swerve.getPose2d().getY() - secondPos.getY()) <= 0.4;
